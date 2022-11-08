@@ -1,17 +1,16 @@
-
 from typing import Union
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, jsonify, Response
+    Blueprint, request, jsonify, Response
 )
-from werkzeug.security import check_password_hash, generate_password_hash
 from voterjsonr.db import get_db
 
-POLL_RESULTS = 'SELECT p.poll_name, pc.choice_name, count(distinct pv.id) num_choice FROM poll_votes pv' \
-                      ' JOIN poll_choices pc ON pc.id = pv.choice_id' \
-                      ' JOIN poll p ON p.id = pv.poll_id' \
-                      ' WHERE pv.poll_id = (?)' \
-                      ' GROUP BY pc.choice_name' \
-                      ' ORDER BY count(distinct pv.id) DESC'
+POLL_RESULTS = 'SELECT p.poll_name, pc.choice_name, count(distinct pv.id) num_choice ' \
+               'FROM poll_votes pv' \
+              ' JOIN poll_choices pc ON pc.id = pv.choice_id' \
+              ' JOIN poll p ON p.id = pv.poll_id' \
+              ' WHERE pv.poll_id = (?)' \
+              ' GROUP BY pc.choice_name' \
+              ' ORDER BY count(distinct pv.id) DESC'
 
 POLL_VOTE = "INSERT INTO poll_votes (poll_id, choice_id) VALUES (?, ?)"
 
@@ -28,6 +27,21 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 
 @bp.route('/createPoll/', methods=('POST',))
 def create_poll() -> Union[Response, tuple[Response, int]]:
+    """
+    To create a poll, use POST method:
+
+    Request:
+    {
+        "poll_name":
+            poll_name,
+        "choices":
+            [choice_1, choice_2, ..]
+    }
+
+    :return:
+    status 200 or error message
+    """
+
     data = request.get_json(force=False, silent=False)
     name, choices = data['poll_name'], data['choices']
 
@@ -50,22 +64,32 @@ def create_poll() -> Union[Response, tuple[Response, int]]:
 
 
 def json_error(error, status=400) -> tuple[Response, int]:
+    """Conversion of a string error message into json"""
     return jsonify({'Error': error}), status
 
 
 def validate_create_poll(choices: Union[set, list, tuple], name: str) -> str:
+    """Copy for the error message when validating a poll creation"""
+
     if not name:
         return 'Name of the poll is required'
-    elif not choices:
+    if not choices:
         return 'Choices for the poll are required'
 
 
 def is_valid_poll_id(db, poll_id: int) -> Response:
+    """Checking whether a poll with chosen poll_id exists in DB"""
     return db.execute(SELECT_ID_FROM_POLL, (poll_id,)).fetchone()
 
 
 @bp.route('/poll/', methods=('POST',))
 def poll_vote() -> Union[Response, tuple[Response, int]]:
+    """To vote for a poll, make a POST request with relevant poll_id and choice_id:
+    {
+        "poll_id": int,
+        "choice_id": int
+    }
+    """
     data = request.get_json(force=False, silent=False)
     poll_id, choice_id = data['poll_id'], data['choice_id']
     db = get_db()
@@ -75,28 +99,38 @@ def poll_vote() -> Union[Response, tuple[Response, int]]:
         return json_error(error)
 
     is_poll_id_in_db = is_valid_poll_id(db, poll_id)
-    choice_ids = [choice['id'] for choice in db.execute(POLL_ID_FROM_POLL_CHOICES, (poll_id,)).fetchall()]
+    choice_ids = [choice['id'] for choice
+                  in db.execute(POLL_ID_FROM_POLL_CHOICES, (poll_id,)).fetchall()]
 
     if not is_poll_id_in_db:
         return json_error(f"Poll with id = {poll_id} doesn't exist")
-    elif choice_id in choice_ids:
+    if choice_id in choice_ids:
         db.execute(POLL_VOTE, (poll_id, choice_id))
         db.commit()
     else:
-        return json_error(f'The choice_id = {choice_id} is not an option of the poll_id = {poll_id}')
+        error_message = f'The choice_id = {choice_id} is not an option of the poll_id = {poll_id}'
+        return json_error(error_message)
 
     return jsonify({'status': 'OK'})
 
 
 def validate_poll(choice_id: int, poll_id: int):
+    """Copy for the error message when validating a poll voting"""
+
     if not poll_id:
         return 'poll_id is required'
-    elif not choice_id:
+    if not choice_id:
         return 'choice_id for the vote is required'
 
 
 @bp.route('/getResult/', methods=('POST', ))
 def poll_results() -> Union[Response, tuple[Response, int]]:
+    """To get poll results by the poll_id, make a POST request:
+    {
+        "poll_id": int
+    }
+    """
+
     data = request.get_json()
     poll_id = data['poll_id']
     db = get_db()
@@ -112,7 +146,7 @@ def poll_results() -> Union[Response, tuple[Response, int]]:
     db.commit()
 
     res = dict()
-    res['results'] = dict()
+    res['results'] = {}
     for poll_name, choice_name, num_choice in poll_result:
         res['poll_name'] = poll_name
         res['results'][choice_name] = num_choice
@@ -120,5 +154,6 @@ def poll_results() -> Union[Response, tuple[Response, int]]:
 
 
 def validate_poll_results(poll_id: int):
+    """Copy for the error message when validating a request for poll results"""
     if not poll_id:
         return 'poll_id is required'

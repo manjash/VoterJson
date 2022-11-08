@@ -1,0 +1,2 @@
+include voterjsonr/schema.sql
+global-exclude *.pyc

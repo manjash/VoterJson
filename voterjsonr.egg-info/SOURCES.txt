@@ -1,0 +1,11 @@
+MANIFEST.in
+setup.py
+voterjsonr/__init__.py
+voterjsonr/commands.py
+voterjsonr/db.py
+voterjsonr/schema.sql
+voterjsonr.egg-info/PKG-INFO
+voterjsonr.egg-info/SOURCES.txt
+voterjsonr.egg-info/dependency_links.txt
+voterjsonr.egg-info/requires.txt
+voterjsonr.egg-info/top_level.txt

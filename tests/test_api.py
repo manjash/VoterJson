@@ -1,6 +1,6 @@
+import json
 import pytest
 from voterjsonr.db import get_db
-import json
 
 POLL_RESULTS = "SELECT count(pv.id) as num, pc.choice_name FROM poll_votes pv " \
     "JOIN poll_choices pc on pc.id = pv.choice_id and pc.poll_id = pv.poll_id " \
@@ -22,12 +22,15 @@ BIRDS_CHOICES = {"jay", "blackbird", "sparrow"}
 
 
 def test_create_poll(client, app):
-    response = client.post('/api/createPoll/', json={"poll_name": "birds", "choices": list(BIRDS_CHOICES)})
+    """Testing poll creation"""
+
+    response = client.post('/api/createPoll/',
+                           json={"poll_name": "birds", "choices": list(BIRDS_CHOICES)})
     assert response.status_code == 200
     assert json.loads(response.data) == {'status': 'OK'}
 
-    with app.app_context() as app:
-        assert get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchone() is not None # count instead or just skip
+    with app.app_context():
+        assert get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchone() is not None
         choice_names = get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchall()
         choice_names = set([cn['cn'] for cn in choice_names])
         assert choice_names == BIRDS_CHOICES

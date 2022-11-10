@@ -23,14 +23,10 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-
     from . import db
     db.init_app(app)
 
     from . import api
     app.register_blueprint(api.bp)
-    #
-    # app.add_url_rule("/api/poll/")
-    # app.add_url_rule("/api/getResult/")
 
     return app

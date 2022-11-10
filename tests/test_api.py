@@ -12,7 +12,7 @@ CHECK_CHOICES_FOR_BIRDS_POLL = "SELECT poll_choices.choice_name as cn FROM poll_
                    "JOIN poll on poll.id = poll_choices.poll_id " \
                    "WHERE poll_name = 'birds'"
 
-COUNT_VOTES_POLLID_1_CHOICEID_1 = "SELECT count(id) as num from poll_votes " \
+VOTES_POLLID_1_CHOICEID_1 = "SELECT count(id) as num from poll_votes " \
                          "WHERE poll_id = 1 and choice_id = 1"
 
 COUNT_VOTES_POLLID_1 = "SELECT count(id) as num from poll_votes " \
@@ -32,7 +32,7 @@ def test_create_poll(client, app):
     with app.app_context():
         assert get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchone() is not None
         choice_names = get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchall()
-        choice_names = set([cn['cn'] for cn in choice_names])
+        choice_names = {cn['cn'] for cn in choice_names}
         assert choice_names == BIRDS_CHOICES
 
 
@@ -49,7 +49,7 @@ def test_create_poll_validation(client, poll_name, choices, message):
 def test_poll_vote(client, app):
     with app.app_context():
         num_of_pokemons = get_db().execute(COUNT_VOTES_POLLID_1).fetchone()['num']
-        num_of_vote_1 = get_db().execute(COUNT_VOTES_POLLID_1_CHOICEID_1).fetchone()['num']
+        num_of_vote_1 = get_db().execute(VOTES_POLLID_1_CHOICEID_1).fetchone()['num']
 
     response = client.post('/api/poll/', json={"poll_id": 1, "choice_id": 1})
     assert response.status_code == 200
@@ -57,7 +57,7 @@ def test_poll_vote(client, app):
 
     with app.app_context():
         assert get_db().execute(COUNT_VOTES_POLLID_1).fetchone()['num'] == num_of_pokemons + 1
-        assert get_db().execute(COUNT_VOTES_POLLID_1_CHOICEID_1).fetchone()['num'] == num_of_vote_1 + 1
+        assert get_db().execute(VOTES_POLLID_1_CHOICEID_1).fetchone()['num'] == num_of_vote_1 + 1
 
 
 @pytest.mark.parametrize(('poll_id', 'choice_id', 'message'), (
@@ -82,7 +82,7 @@ def test_poll_results(client, app):
     with app.app_context():
         test_poll_name = 'animals'
         res_data = get_db().execute(POLL_RESULTS, (test_poll_name,)).fetchall()
-        dict_res = {'poll_name': test_poll_name, 'results': dict()}
+        dict_res = {'poll_name': test_poll_name, 'results': {}}
         for num, choice_name in res_data:
             dict_res["results"][choice_name] = num
         assert dict_res == benchmark

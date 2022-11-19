@@ -7,7 +7,11 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'voterjsonr.sqlite'),
+        DB_PORT=5432,
+        DB_HOST='localhost',
+        DB_NAME='voterjson_db',
+        DB_USERNAME='postgres',
+        DB_PASSWORD='qwerty123',
     )
 
     if test_config is None:
@@ -23,8 +27,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import db
-    db.init_app(app)
+    from . import db_pg
+    db_pg.init_app(app)
 
     from . import api
     app.register_blueprint(api.bp)

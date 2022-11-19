@@ -1,11 +1,11 @@
 import json
 import pytest
-from voterjsonr.db import get_db
+from voterjsonr.db_pg import get_db
 
 POLL_RESULTS = "SELECT count(pv.id) as num, pc.choice_name FROM poll_votes pv " \
     "JOIN poll_choices pc on pc.id = pv.choice_id and pc.poll_id = pv.poll_id " \
     "JOIN poll p on p.id = pv.poll_id " \
-    "WHERE p.poll_name = (?) " \
+    "WHERE p.poll_name = (%s) " \
     "GROUP BY pc.choice_name"
 
 CHECK_CHOICES_FOR_BIRDS_POLL = "SELECT poll_choices.choice_name as cn FROM poll_choices " \
@@ -30,10 +30,12 @@ def test_create_poll(client, app):
     assert json.loads(response.data) == {'status': 'OK'}
 
     with app.app_context():
-        assert get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchone() is not None
-        choice_names = get_db().execute(CHECK_CHOICES_FOR_BIRDS_POLL).fetchall()
-        choice_names = {cn['cn'] for cn in choice_names}
-        assert choice_names == BIRDS_CHOICES
+        with get_db().cursor() as cur:
+            cur.execute(CHECK_CHOICES_FOR_BIRDS_POLL)
+            assert cur.fetchone() is not None
+            cur.execute(CHECK_CHOICES_FOR_BIRDS_POLL)
+            choice_names = {cn[0] for cn in cur.fetchall()}
+            assert choice_names == BIRDS_CHOICES
 
 
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
@@ -41,23 +43,33 @@ def test_create_poll(client, app):
     ('a', '', b'Choices for the poll are required'),
     ('pokemons', 'test', b'Poll pokemons is already registered'),
 ))
-def test_create_poll_validation(client, poll_name, choices, message):
-    response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})
-    assert message in response.data
+def test_create_poll_validation(client, poll_name, choices, message, app):
+    with app.app_context():
+        with get_db().cursor() as cur:
+            cur.execute("select poll_name from poll;")
+            print('----->', cur.fetchall())
+            response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})
+            assert message in response.data
 
 
 def test_poll_vote(client, app):
     with app.app_context():
-        num_of_pokemons = get_db().execute(COUNT_VOTES_POLLID_1).fetchone()['num']
-        num_of_vote_1 = get_db().execute(VOTES_POLLID_1_CHOICEID_1).fetchone()['num']
+        with get_db().cursor() as cur:
+            cur.execute(COUNT_VOTES_POLLID_1)
+            num_of_pokemons = cur.fetchone()[0]
+            cur.execute(VOTES_POLLID_1_CHOICEID_1)
+            num_of_vote_1 = cur.fetchone()[0]
 
     response = client.post('/api/poll/', json={"poll_id": 1, "choice_id": 1})
     assert response.status_code == 200
     assert json.loads(response.data) == {'status': 'OK'}
 
     with app.app_context():
-        assert get_db().execute(COUNT_VOTES_POLLID_1).fetchone()['num'] == num_of_pokemons + 1
-        assert get_db().execute(VOTES_POLLID_1_CHOICEID_1).fetchone()['num'] == num_of_vote_1 + 1
+        with get_db().cursor() as cur:
+            cur.execute(COUNT_VOTES_POLLID_1)
+            assert cur.fetchone()[0] == num_of_pokemons + 1
+            cur.execute(VOTES_POLLID_1_CHOICEID_1)
+            assert cur.fetchone()[0] == num_of_vote_1 + 1
 
 
 @pytest.mark.parametrize(('poll_id', 'choice_id', 'message'), (
@@ -80,12 +92,14 @@ def test_poll_results(client, app):
     assert benchmark == json.loads(response.data)
 
     with app.app_context():
-        test_poll_name = 'animals'
-        res_data = get_db().execute(POLL_RESULTS, (test_poll_name,)).fetchall()
-        dict_res = {'poll_name': test_poll_name, 'results': {}}
-        for num, choice_name in res_data:
-            dict_res["results"][choice_name] = num
-        assert dict_res == benchmark
+        with get_db().cursor() as cur:
+            test_poll_name = 'animals'
+            cur.execute(POLL_RESULTS, (test_poll_name,))
+            res_data = cur.fetchall()
+            dict_res = {'poll_name': test_poll_name, 'results': {}}
+            for num, choice_name in res_data:
+                dict_res["results"][choice_name] = num
+            assert dict_res == benchmark
 
 
 @pytest.mark.parametrize(('poll_id', 'message'), (

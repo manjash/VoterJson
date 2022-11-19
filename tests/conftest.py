@@ -28,24 +28,36 @@ def pg_tmp():
 
 @pytest.fixture
 def app():
-    port, host, dbname, username = pg_tmp()
+    # port, host, dbname, username = pg_tmp()
 
-    app = create_app({
-        'TESTING': True,
-        'DB_PORT': port,
-        'DB_HOST': host,
-        'DB_NAME': dbname,
-        'DB_USERNAME': username,
-    })
+    app = create_app(
+    #     {
+    #     'TESTING': True,
+    #     'DB_PORT': port,
+    #     'DB_HOST': host,
+    #     'DB_NAME': dbname,
+    #     'DB_USERNAME': username,
+    # }
+    )
+
+    app.config.from_mapping(
+        SECRET_KEY='test',
+        DB_PORT=5432,
+        DB_HOST='localhost',
+        DB_NAME='voterjson_db_test',
+        DB_USERNAME='postgres',
+        DB_PASSWORD='qwerty123',
+    )
 
     with app.app_context():
         init_db()
-        with get_db().cursor() as cur:
+        conn = get_db()
+        with conn.cursor() as cur:
             cur.execute(_data_sql)
             # for testing
             cur.execute('select poll_name from poll;')
             print('---##----->', cur.fetchall())
-
+        conn.commit()
     yield app
 
 

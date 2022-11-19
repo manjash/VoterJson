@@ -1,5 +1,6 @@
 # Exclude compiled code
 *.pyc
+__pycache__/
 *.o
 *.class
 

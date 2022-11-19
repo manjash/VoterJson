@@ -1,0 +1,7 @@
+# Exclude compiled code
+*.pyc
+*.o
+*.class
+
+# Exclude venv files
+venv/

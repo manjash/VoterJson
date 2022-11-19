@@ -14,7 +14,7 @@ Supported functionality:
 Make a POST a json-format request to `/api/createPoll/` with the `poll_name` and `choices` options:
 
 ```
-{"poll_name": "animals", "choices": ['wolf', 'fox', 'sheep']}
+{"poll_name": "animals", "choices": ["wolf", "fox", "sheep"]}
 ```
 
 ## Voting for a poll option

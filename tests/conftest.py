@@ -1,8 +1,8 @@
 import os
-import tempfile
-import psycopg2
-import subprocess
-from urllib.parse import urlparse
+# import tempfile
+# import psycopg2
+# import subprocess
+# from urllib.parse import urlparse
 
 import pytest
 from voterjsonr import create_app

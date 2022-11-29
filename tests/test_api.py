@@ -41,15 +41,11 @@ def test_create_poll(client, app):
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
     ('', '', b'Name of the poll is required'),
     ('a', '', b'Choices for the poll are required'),
-    ('pokemons', 'test', b'Poll pokemons is already registered'),
+    ('animals', 'test', b'Poll animals is already registered'),
 ))
-def test_create_poll_validation(client, poll_name, choices, message, app):
-    with app.app_context():
-        with get_db().cursor() as cur:
-            cur.execute("select poll_name from poll;")
-            print('----->', cur.fetchall())
-            response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})
-            assert message in response.data
+def test_create_poll_validation(client, poll_name, choices, message):
+    response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})
+    assert message in response.data
 
 
 def test_poll_vote(client, app):

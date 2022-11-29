@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .env.docker:/python-docker/.env
+    ports:
+      - "6000:5000"
+  db:
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty123
+      - POSTGRES_DB=voterjson_db
+  test_db:
+    image: postgres:latest
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty123
+      - POSTGRES_DB=voterjson_db_test
+
+

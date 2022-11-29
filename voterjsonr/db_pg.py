@@ -27,11 +27,21 @@ def close_db(e=None):
 
 def init_db():
     db = get_db()
-
     with db.cursor() as cur:
         with current_app.open_resource('schema.sql') as f:
             cur.execute(f.read().decode('utf8'))
             db.commit()
+
+
+def drop_db():
+    db = get_db()
+    with db.cursor() as cur:
+        cur.execute("drop schema public cascade;"
+                    "create schema public;"
+                    "grant all on schema public to postgres;"
+                    "grant all on schema public to public;")
+        db.commit()
+
 
 
 @click.command('init-db')

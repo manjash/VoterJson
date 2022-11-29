@@ -32,3 +32,64 @@ Make a POST a json-format request to `/api/getResult/` with the `poll_id` of the
 ```
 {"poll_id": 1}
 ```
+
+
+# Docker
+
+Do this all inside venv. Venv is initiated through Dockerfile.
+
+## Creating a container with postgres
+
+For some reason, creating Dockerfile in /database and building -> running it didn't work.
+That's why doing this instead
+```
+docker run --name voterjson_db -e POSTGRES_PASSWORD=qwerty123 -d postgres
+```
+
+Change to ```postgres``` user to access the DB
+
+```
+su postgres
+```
+
+Check the DB --> ```psql```
+
+Check connection info --> ```\conninfo```
+
+Exit interactive mode --> ```\q``` --> ```exit``` --> ```exit```
+
+Check that docker is still running --> ```docker ps```
+
+Stop / rm the container ```docker stop voterjson_db``` --> ```docker rm voterjson_db```
+
+Run the container connected to PgAdmin:
+```docker run --name voterjson_db -p 5433:5432 -e POSTGRES_PASSWORD=qwerty123 -d postgres```
+
+Good instructions on how to set up connections:
+https://www.optimadata.nl/blogs/1/n8dyr5-how-to-run-postgres-on-docker-part-1
+
+## Building docker with python
+
+Everytime when something changes in the app, rebuild and then run
+
+```
+docker build . -t voterjson
+```
+
+## Running Docker
+
+```
+docker run --rm -it -p 5001:5001 voterjson
+```
+
+## For debugging
+
+To see folders and files
+
+```
+docker run --rm -it voterjson bash
+```
+
+# Run both docker containers
+
+```docker compose up --build```

@@ -24,7 +24,7 @@ jobs:
         pylint $(git ls-files '*.py') --fail-under=7.5
     - name: Build docker and launch flask
       run: |
-        docker compose up --build -d
+        docker compose -f "docker-compose.yml" up --build -d
     - name: Init db in flask app
       run: |  
         docker compose exec app flask --app voterjsonr init-db

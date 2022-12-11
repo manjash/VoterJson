@@ -40,7 +40,7 @@ def test_create_poll(client, app):
 
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
     ('', '', b'Name of the poll is required'),
-    ('a', '', b'Choices for the poll are required'),
+    ('a', '', b'Choices for the poll in list format are required'),
     ('animals', 'test', b'Poll animals is already registered'),
 ))
 def test_create_poll_validation(client, poll_name, choices, message):
@@ -99,7 +99,7 @@ def test_poll_results(client, app):
 
 
 @pytest.mark.parametrize(('poll_id', 'message'), (
-    ('', b'poll_id is required'),
+    ('', b'Invalid poll_id type'),
     (99999, b"Poll with id = 99999 doesn't exist"),
 ))
 def test_poll_results_validation(client, poll_id, message):

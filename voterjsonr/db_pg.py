@@ -42,7 +42,6 @@ def drop_db():
         db.commit()
 
 
-
 @click.command('init-db')
 def init_db_command():
     """Clear the existing data and create new tables."""
@@ -53,5 +52,3 @@ def init_db_command():
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
-
-

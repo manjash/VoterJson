@@ -9,7 +9,6 @@ POLL_RESULTS = 'SELECT p.poll_name, pc.choice_name, count(distinct pv.id) num_ch
               ' ORDER BY num_choice DESC'
 
 EXIST_POLL_ID = "SELECT EXISTS (SELECT id FROM poll WHERE id = (%s));"
-EXIST_POLL_NAME = "SELECT EXISTS (SELECT id FROM poll WHERE poll_name = (%s));"
 
 POLL_ID_FROM_POLL_CHOICES = "SELECT id FROM poll_choices WHERE poll_id = (%s);"
 
@@ -43,19 +42,11 @@ class PollsService():
             res['results'][choice_name] = num_choice
         return res
 
-
     def is_valid_poll_id(self, poll_id: int):
         """Checking whether a poll with chosen poll_id exists in DB"""
         with self.db.cursor() as cur:
             cur.execute(EXIST_POLL_ID, (poll_id,))
             return cur.fetchone()
-
-    def poll_name_exists(self, poll_name: str):
-        """Checking whether a poll with chosen poll_name exists in DB"""
-        with self.db.cursor() as cur:
-            cur.execute(EXIST_POLL_NAME, (poll_name,))
-            return cur.fetchone()
-
 
     def make_poll_vote(self, poll_id: int, choice_id: int):
         if not isinstance(poll_id, int):
@@ -79,8 +70,6 @@ class PollsService():
     def create_poll(self, name: str, choices: list):
         if not isinstance(name, str) or name == '':
             raise Exception('Name of the poll is required')
-        if self.poll_name_exists(name)[0]:
-            raise Exception(f"Poll {name} is already registered")
         if not isinstance(choices, list) or choices == []:
             raise Exception('Choices for the poll in list format are required')
 

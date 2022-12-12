@@ -41,7 +41,7 @@ def test_create_poll(client, app):
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
     ('', '', b'Name of the poll is required'),
     ('a', '', b'Choices for the poll in list format are required'),
-    ('animals', 'test', b'Poll animals is already registered'),
+    ('animals', ['test1', 'test2'], b'Key (poll_name)=(animals) already exists'),
 ))
 def test_create_poll_validation(client, poll_name, choices, message):
     response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})

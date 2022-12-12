@@ -17,7 +17,7 @@ def get_db():
     return g.db
 
 
-def close_db():
+def close_db(e=None):
     if "db" in g:
         g.db.close()
 

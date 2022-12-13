@@ -34,12 +34,12 @@ class PollsService():
 
         if not poll_result:
             raise Exception(f"Poll with id = {poll_id} doesn't exist")
-        else:
-            res = {'results': {}}
-            for poll_name, choice_name, num_choice in poll_result:
-                res['poll_name'] = poll_name
-                res['results'][choice_name] = num_choice
-            return res
+        
+        res = {'results': {}}
+        for poll_name, choice_name, num_choice in poll_result:
+            res['poll_name'] = poll_name
+            res['results'][choice_name] = num_choice
+        return res
 
     def make_poll_vote(self, poll_id: int, choice_id: int):
         if not isinstance(poll_id, int):

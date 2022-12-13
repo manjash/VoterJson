@@ -71,8 +71,8 @@ def test_poll_vote(client, app):
 @pytest.mark.parametrize(('poll_id', 'choice_id', 'message'), (
     ('', '', b'poll_id is required'),
     (1, '', b'choice_id for the vote is required'),
-    (99999, 2, b"Poll with id = 99999 doesn't exist"),
-    (1, 99999, b"The choice_id = 99999 is not an option of the poll_id = 1"),
+    (99999, 2, b'Key (poll_id)=(99999) is not present in table \\"poll\\"'),
+    (1, 99999, b'Key (choice_id)=(99999) is not present in table \\"poll_choices\\"'),
 ))
 def test_poll_vote_validation(client, poll_id, choice_id, message):
     response = client.post('/api/poll/', json={'poll_id': poll_id, 'choice_id': choice_id})

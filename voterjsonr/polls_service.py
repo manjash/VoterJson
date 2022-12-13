@@ -8,8 +8,6 @@ POLL_RESULTS = 'SELECT p.poll_name, pc.choice_name, count(distinct pv.id) num_ch
               ' GROUP BY pc.choice_name, p.poll_name' \
               ' ORDER BY num_choice DESC'
 
-EXIST_POLL_ID = "SELECT EXISTS (SELECT id FROM poll WHERE id = (%s));"
-
 POLL_ID_FROM_POLL_CHOICES = "SELECT id FROM poll_choices WHERE poll_id = (%s);"
 
 POLL_VOTE = "INSERT INTO poll_votes (poll_id, choice_id) VALUES (%s, %s);"
@@ -28,25 +26,20 @@ class PollsService():
 
         if not isinstance(poll_id, int):
             raise Exception('Invalid poll_id type')
-        if not self.is_valid_poll_id(poll_id)[0]:
-            raise Exception(f"Poll with id = {poll_id} doesn't exist")
 
         with self.db.cursor() as cur:
             cur.execute(POLL_RESULTS, (poll_id,))
             poll_result = cur.fetchall()
             self.db.commit()
 
-        res = {'results': {}}
-        for poll_name, choice_name, num_choice in poll_result:
-            res['poll_name'] = poll_name
-            res['results'][choice_name] = num_choice
-        return res
-
-    def is_valid_poll_id(self, poll_id: int):
-        """Checking whether a poll with chosen poll_id exists in DB"""
-        with self.db.cursor() as cur:
-            cur.execute(EXIST_POLL_ID, (poll_id,))
-            return cur.fetchone()
+        if not poll_result:
+            raise Exception(f"Poll with id = {poll_id} doesn't exist")
+        else:
+            res = {'results': {}}
+            for poll_name, choice_name, num_choice in poll_result:
+                res['poll_name'] = poll_name
+                res['results'][choice_name] = num_choice
+            return res
 
     def make_poll_vote(self, poll_id: int, choice_id: int):
         if not isinstance(poll_id, int):
@@ -54,18 +47,9 @@ class PollsService():
         if not isinstance(choice_id, int):
             raise Exception('choice_id for the vote is required')
 
-        if not self.is_valid_poll_id(poll_id)[0]:
-            raise Exception(f"Poll with id = {poll_id} doesn't exist")
-
         with self.db.cursor() as cur:
-            cur.execute(POLL_ID_FROM_POLL_CHOICES, (poll_id,))
-            choice_ids = [choice[0] for choice in cur.fetchall()]
-
-            if choice_id in choice_ids:
-                cur.execute(POLL_VOTE, (poll_id, choice_id))
-                self.db.commit()
-            else:
-                raise Exception(f'The choice_id = {choice_id} is not an option of the poll_id = {poll_id}')
+            cur.execute(POLL_VOTE, (poll_id, choice_id))
+            self.db.commit()
 
     def create_poll(self, name: str, choices: list):
         if not isinstance(name, str) or name == '':

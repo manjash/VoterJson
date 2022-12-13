@@ -34,7 +34,6 @@ class PollsService():
 
         if not poll_result:
             raise Exception(f"Poll with id = {poll_id} doesn't exist")
-        
         res = {'results': {}}
         for poll_name, choice_name, num_choice in poll_result:
             res['poll_name'] = poll_name

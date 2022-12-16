@@ -14,6 +14,8 @@ CREATE TABLE poll_choices (
     FOREIGN KEY (poll_id) REFERENCES poll (id)
 );
 
+CREATE INDEX poll_choices__poll_id_index ON poll_choices (poll_id);
+
 CREATE TABLE poll_votes (
     id SERIAL PRIMARY KEY,
     poll_id INTEGER NOT NULL,
@@ -21,3 +23,5 @@ CREATE TABLE poll_votes (
     FOREIGN KEY (poll_id) REFERENCES poll (id),
     FOREIGN KEY (choice_id) REFERENCES poll_choices (id)
 );
+
+CREATE INDEX poll_votes__choice_id_index ON poll_votes (choice_id);

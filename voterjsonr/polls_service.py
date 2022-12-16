@@ -4,11 +4,9 @@ POLL_RESULTS = 'SELECT p.poll_name, pc.choice_name, count(distinct pv.id) num_ch
                'FROM poll_votes pv' \
               ' JOIN poll_choices pc ON pc.id = pv.choice_id' \
               ' JOIN poll p ON p.id = pv.poll_id' \
-              ' WHERE pv.poll_id = (%s)' \
+              ' WHERE p.id = (%s)' \
               ' GROUP BY pc.choice_name, p.poll_name' \
               ' ORDER BY num_choice DESC'
-
-POLL_ID_FROM_POLL_CHOICES = "SELECT id FROM poll_choices WHERE poll_id = (%s);"
 
 POLL_VOTE = "INSERT INTO poll_votes (poll_id, choice_id) VALUES (%s, %s);"
 

@@ -4,12 +4,12 @@ DROP TABLE IF EXISTS poll_choices CASCADE;
 
 CREATE TABLE poll (
     id SERIAL PRIMARY KEY,
-    poll_name TEXT UNIQUE NOT NULL
+    poll_name VARCHAR(256) UNIQUE NOT NULL
 );
 
 CREATE TABLE poll_choices (
     id SERIAL PRIMARY KEY ,
-    choice_name TEXT NOT NULL,
+    choice_name VARCHAR(128) NOT NULL,
     poll_id INTEGER NOT NULL,
     FOREIGN KEY (poll_id) REFERENCES poll (id)
 );

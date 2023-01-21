@@ -1,8 +1,13 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
+
+db = SQLAlchemy()
+
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -16,13 +21,18 @@ def create_app(test_config=None):
             DB_NAME=os.environ['DB_NAME'],
             DB_USERNAME=os.environ['DB_USERNAME'],
             DB_PASSWORD=os.environ['DB_PASSWORD'],
+            SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
         )
     else:
         # load the test config if passed in
         app.config.from_mapping(test_config)
 
-    from . import db_pg
-    db_pg.init_app(app)
+    db.init_app(app)
+
+    from . import models as _
+
+    with app.app_context():
+        db.create_all()
 
     from . import api
     app.register_blueprint(api.bp)

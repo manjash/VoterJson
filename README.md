@@ -41,7 +41,10 @@ Do this all inside venv. Venv is initiated through Dockerfile.
 ## Creating a container with postgres
 
 For some reason, creating Dockerfile in /database and building -> running it didn't work.
-That's why doing this instead
+That's why doing this instead:
+
+First of all, launch Docker app locally. Then run
+
 ```
 docker run --name voterjson_db -e POSTGRES_PASSWORD=qwerty123 -d postgres
 ```
@@ -93,3 +96,11 @@ docker run --rm -it voterjson bash
 # Run both docker containers
 
 ```docker compose up --build```
+
+# Code check with linter
+
+```pylint $(git ls-files '*.py')```
+
+# Pytest test runs
+
+```pytest```

@@ -1,7 +1,8 @@
 import os
 import pytest
 from voterjsonr import create_app
-from voterjsonr.db_pg import get_db, init_db, drop_db
+from voterjsonr import db
+from sqlalchemy.sql import text
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')
@@ -16,15 +17,14 @@ def app():
         DB_NAME=os.environ['TEST_DB_NAME'],
         DB_USERNAME=os.environ['TEST_DB_USERNAME'],
         DB_PASSWORD=os.environ['TEST_DB_PASSWORD'],
+        SQLALCHEMY_DATABASE_URI=os.environ['TEST_DATABASE_URL'],
     )
 
     with flask_app.app_context():
-        drop_db()
-        init_db()
-        conn = get_db()
-        with conn.cursor() as cur:
-            cur.execute(_data_sql)
-        conn.commit()
+        db.drop_all()
+        db.create_all()
+        db.session.execute(text(_data_sql))
+        db.session.commit()
     yield flask_app
 
 

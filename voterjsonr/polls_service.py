@@ -1,11 +1,10 @@
 from sqlalchemy import func, desc
-from voterjsonr import db
 from .models import Poll, PollVotes, PollChoices
 
 
 class PollsService:
     """Methods to create polls, vote and get poll results"""
-    def __init__(self):
+    def __init__(self, db):
         self.db = db
 
     def get_poll_results(self, poll_id: int):

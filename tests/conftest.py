@@ -1,7 +1,7 @@
 import os
 import pytest
 from voterjsonr import create_app
-from voterjsonr import db
+from voterjsonr import database
 from sqlalchemy.sql import text
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:

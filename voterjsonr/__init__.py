@@ -1,11 +1,11 @@
 import os
 from flask import Flask
 from dotenv import load_dotenv
-from flask_sqlalchemy import SQLAlchemy
+from voterjsonr.database import db
 
 load_dotenv()
 
-db = SQLAlchemy()
+
 
 
 

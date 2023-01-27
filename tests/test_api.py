@@ -1,7 +1,7 @@
 import json
 import pytest
 from sqlalchemy import func, desc
-from voterjsonr import db
+from voterjsonr import database
 from voterjsonr.models import PollVotes, Poll, PollChoices
 
 

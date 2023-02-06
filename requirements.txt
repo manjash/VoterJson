@@ -37,7 +37,6 @@ tomli==2.0.1
 tomlkit==0.11.6
 tornado==6.2
 typing_extensions==4.4.0
--e git+ssh://git@github.com/manjash/VoterJson.git@924ecf845e5fe77e40d4e039ff6bb3a879b74e1d#egg=voterjsonr
 Werkzeug==2.2.2
 wrapt==1.14.1
 zipp==3.8.1

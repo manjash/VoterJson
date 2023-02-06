@@ -1,8 +1,9 @@
 import os
 import pytest
-from voterjsonr import create_app
-from voterjsonr import database
 from sqlalchemy.sql import text
+from voterjsonr import create_app
+from voterjsonr.database import db
+
 
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')

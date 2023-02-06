@@ -1,31 +1,11 @@
 import json
 import pytest
 from sqlalchemy import func, desc
-from voterjsonr import database
+from voterjsonr.database import db
 from voterjsonr.models import PollVotes, Poll, PollChoices
 
-
-# POLL_RESULTS = "SELECT count(pv.id) as num, pc.choice_name FROM poll_votes pv " \
-#     "JOIN poll_choices pc on pc.id = pv.choice_id and pc.poll_id = pv.poll_id " \
-#     "JOIN poll p on p.id = pv.poll_id " \
-#     "WHERE p.poll_name = (%s) " \
-#     "GROUP BY pc.choice_name"
-
-
-# CHECK_CHOICES_FOR_BIRDS_POLL = "SELECT poll_choices.choice_name as cn FROM poll_choices " \
-#                    "JOIN poll on poll.id = poll_choices.poll_id " \
-#                    "WHERE poll_name = 'birds'"
-#
-# VOTES_POLLID_1_CHOICEID_1 = "SELECT count(id) as num from poll_votes " \
-#                          "WHERE poll_id = 1 and choice_id = 1"
-#
-# COUNT_VOTES_POLLID_1 = "SELECT count(id) as num from poll_votes " \
-#            "WHERE poll_id = 1"
-
-
-#
 BIRDS_CHOICES = {"jay", "blackbird", "sparrow"}
-#
+
 
 def test_create_poll(client, app):
     """Testing poll creation"""
@@ -42,8 +22,7 @@ def test_create_poll(client, app):
                                              ).all()
         assert choice_names is not None
         assert {cn[0] for cn in choice_names} == BIRDS_CHOICES
-#
-#
+
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
     ('', '', b'Name of the poll is required'),
     (12, '', b'Name of the poll is required'),
@@ -53,8 +32,8 @@ def test_create_poll(client, app):
 def test_create_poll_validation(client, poll_name, choices, message):
     response = client.post('/api/createPoll/', json={"poll_name": poll_name, "choices": choices})
     assert message in response.data
-#
-#
+
+
 def test_poll_vote(client, app):
     with app.app_context():
         num_of_pokemons = db.session.execute(db.select(func.count(PollVotes.id))

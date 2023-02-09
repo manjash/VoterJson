@@ -14,11 +14,6 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_mapping(
             SECRET_KEY=os.environ['SECRET_KEY'],
-            DB_PORT=int(os.environ['DB_PORT']),
-            DB_HOST=os.environ['DB_HOST'],
-            DB_NAME=os.environ['DB_NAME'],
-            DB_USERNAME=os.environ['DB_USERNAME'],
-            DB_PASSWORD=os.environ['DB_PASSWORD'],
             SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
         )
     else:

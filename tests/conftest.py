@@ -13,11 +13,6 @@ def app():
     flask_app = create_app()
     flask_app.config.from_mapping(
         SECRET_KEY=os.environ['TEST_SECRET_KEY'],
-        DB_PORT=int(os.environ['TEST_DB_PORT']),
-        DB_HOST=os.environ['TEST_DB_HOST'],
-        DB_NAME=os.environ['TEST_DB_NAME'],
-        DB_USERNAME=os.environ['TEST_DB_USERNAME'],
-        DB_PASSWORD=os.environ['TEST_DB_PASSWORD'],
         SQLALCHEMY_DATABASE_URI=os.environ['TEST_DATABASE_URL'],
     )
 

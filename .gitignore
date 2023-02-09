@@ -6,3 +6,7 @@ __pycache__/
 
 # Exclude venv files
 venv/
+
+# Excludes .env files
+.env
+.env.docker

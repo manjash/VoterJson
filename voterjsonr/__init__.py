@@ -3,10 +3,8 @@ from flask import Flask
 from dotenv import load_dotenv
 from voterjsonr.database import db
 
+
 load_dotenv()
-
-
-
 
 
 def create_app(test_config=None):
@@ -22,6 +20,7 @@ def create_app(test_config=None):
             DB_USERNAME=os.environ['DB_USERNAME'],
             DB_PASSWORD=os.environ['DB_PASSWORD'],
             SQLALCHEMY_DATABASE_URI=os.environ['DATABASE_URL'],
+            SQLALCHEMY_ECHO=True,
         )
     else:
         # load the test config if passed in
@@ -29,12 +28,12 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
+    from . import api
+    app.register_blueprint(api.bp)
+
     from . import models as _
 
     with app.app_context():
         db.create_all()
-
-    from . import api
-    app.register_blueprint(api.bp)
 
     return app

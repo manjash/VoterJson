@@ -9,4 +9,3 @@ venv/
 
 # Excludes .env files
 .env
-.env.docker

@@ -27,12 +27,12 @@ jobs:
     - name: Build docker and launch flask
       run: |
         docker compose -f "docker-compose.yml" up --build -d
-    - name: Sleep for 10 seconds
-      run: sleep 10s
+    - name: Sleep for 20 seconds
+      run: sleep 20s
       shell: bash
     - name: Init db in flask app
       run: |
-        docker compose exec app flask --app voterjsonr init-db
+        docker compose exec app flask --app voterjsonr
     - name: Test with pytest
       run: |
         docker compose exec app pytest

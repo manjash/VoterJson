@@ -5,6 +5,9 @@ services:
       - .env.docker:/python-docker/.env
     ports:
       - 6000:5000
+    depends_on:
+      - db
+      - test_db
   db:
     image: postgres:latest
     ports:

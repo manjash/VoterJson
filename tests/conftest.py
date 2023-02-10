@@ -1,7 +1,7 @@
 import os
+from pathlib import Path
 import pytest
 from sqlalchemy.sql import text
-from pathlib import Path
 from voterjsonr import create_app
 from voterjsonr.database import db
 

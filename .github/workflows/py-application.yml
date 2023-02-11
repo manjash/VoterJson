@@ -26,7 +26,7 @@ jobs:
         pylint $(git ls-files '*.py')
     - name: Build docker and launch flask
       run: |
-        docker compose -f "docker-compose.yml" up --build -d
+        docker compose -f "docker-compose.yml" -f "docker-compose.override.yml" up --build -d
     - name: Test with pytest
       run: |
         docker compose exec app pytest

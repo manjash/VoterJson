@@ -11,16 +11,8 @@ with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
 
 @pytest.fixture
 def app():
-    flask_app = create_app()
-    dotenv_path = Path('.env.testing')
-
-    from dotenv import load_dotenv
-    load_dotenv(dotenv_path=dotenv_path)
-
-    flask_app.config.from_mapping(
-        SECRET_KEY=os.environ['TEST_SECRET_KEY'],
-        SQLALCHEMY_DATABASE_URI=os.environ['TEST_DATABASE_URL'],
-    )
+    # flask_app = create_app()
+    flask_app = create_app(test_config=".env.testing")
 
     with flask_app.app_context():
         db.drop_all()

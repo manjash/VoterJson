@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 import pytest
 from sqlalchemy.sql import text
 from voterjsonr import create_app
@@ -11,7 +10,6 @@ with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
 
 @pytest.fixture
 def app():
-    # flask_app = create_app()
     flask_app = create_app(test_config=".env.testing")
 
     with flask_app.app_context():

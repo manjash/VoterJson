@@ -3,7 +3,6 @@ services:
     build: .
     volumes:
       - .env.docker:/python-docker/.env
-      - .env.testing.docker:/python-docker/.env.testing
     ports:
       - 6000:5000
     depends_on:

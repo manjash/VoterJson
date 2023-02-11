@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .env.testing.docker:/python-docker/.env
+      - .env.testing.docker:/python-docker/.env.testing

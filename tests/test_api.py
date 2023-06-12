@@ -23,6 +23,7 @@ def test_create_poll(client, app):
         assert choice_names is not None
         assert {cn[0] for cn in choice_names} == BIRDS_CHOICES
 
+
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
     ('', '', b'Name of the poll is required'),
     (12, '', b'Name of the poll is required'),

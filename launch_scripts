@@ -9,7 +9,3 @@ docker compose exec app flask --app voterjsonr init-db
 docker compose exec app flask --app voterjsonr --debug run
 
 
-??? didn't try, requires testing
-
-docker compose exec app pytest
-

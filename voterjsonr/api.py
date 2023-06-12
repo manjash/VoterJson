@@ -59,8 +59,8 @@ def poll_vote() -> Union[Response, tuple[Response, int]]:
     except Exception as err:
         return json_error(err.args[0])
     return jsonify({'status': 'OK'})
-#
-#
+
+
 @bp.route('/getResult/', methods=('POST', ))
 def poll_results() -> Union[Response, tuple[Response, int]]:
     """To get poll results by the poll_id, make a POST request:

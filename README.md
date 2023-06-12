@@ -65,21 +65,37 @@ Check that docker is still running --> ```docker ps```
 
 Stop / rm the container ```docker stop voterjson_db``` --> ```docker rm voterjson_db```
 
-Run the container connected to PgAdmin:
+Run the container connected to PgAdmin to create a 'prod' postgres DB:
 ```docker run --name voterjson_db -p 5433:5432 -e POSTGRES_PASSWORD=qwerty123 -d postgres```
+
+### And then create a test DB in the same container
+
+```
+psql -p 5433 -h localhost -U postgres -e POSTGRES_PASSWORD=qwerty123
+create database voterjson_db_test
+```
+
+
 
 Good instructions on how to set up connections:
 https://www.optimadata.nl/blogs/1/n8dyr5-how-to-run-postgres-on-docker-part-1
 
-## Building docker with python
+## Building/running docker with python
 
 Everytime when something changes in the app, rebuild and then run
 
+Locally:
 ```
 docker build . -t voterjson
 ```
 
-## Running Docker
+With docker compose:
+
+```
+docker compose up --build -d
+```
+
+### Running Docker
 
 ```
 docker run --rm -it -p 5001:5001 voterjson
@@ -93,14 +109,32 @@ To see folders and files
 docker run --rm -it voterjson bash
 ```
 
-# Run both docker containers
+## Code check with linter
 
-```docker compose up --build```
+Locally:
+```
+pylint $(git ls-files '*.py')
+```
 
-# Code check with linter
+With docker compose:
+```
+docker compose exec app pylint $(git ls-files '*.py')
+```
 
-```pylint $(git ls-files '*.py')```
+## Pytest test runs
 
-# Pytest test runs
+### Running tests locally:
 
-```pytest```
+Before running tests, make sure that the DB `voterjson_db_test` is created. If not, repeat [these steps](#And-then-create-a-test-DB-in-the-same-container).
+
+The command below takes params from .env.testing and feeds them directly into pytest
+
+```
+env $(cat .env.testing) pytest
+```
+
+### Running tests with docker compose
+
+```
+docker compose exec app pytest
+```

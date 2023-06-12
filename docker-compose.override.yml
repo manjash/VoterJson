@@ -1,8 +1,0 @@
-services:
-  app:
-    build: .
-    volumes:
-      - .env.testing.docker:/home/runner/work/VoterJson/VoterJson/.env
-#      - .env.testing.docker:/python-docker/.env
-      - .env.testing.docker:/home/runner/work/VoterJson/VoterJson/.env.testing
-#      - .env.testing.docker:/python-docker/.env.testing

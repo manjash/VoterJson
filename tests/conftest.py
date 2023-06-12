@@ -8,6 +8,7 @@ from voterjsonr.database import db
 with open(os.path.join(os.path.dirname(__file__), 'data.sql'), 'rb') as f:
     _data_sql = f.read().decode('utf8')
 
+
 @pytest.fixture
 def app():
     flask_app = create_app(test_config=".env.testing")

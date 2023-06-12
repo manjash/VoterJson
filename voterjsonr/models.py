@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from voterjsonr.database import db
 
+
 # pylint: disable=too-few-public-methods,missing-class-docstring
 class Poll(db.Model):
     __tablename__ = 'poll'

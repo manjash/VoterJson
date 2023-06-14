@@ -3,6 +3,14 @@
 __pycache__/
 *.o
 *.class
+.coverage
+.idea
 
 # Exclude venv files
 venv/
+
+# Excludes .env files
+.env
+
+# Other
+launch_scripts

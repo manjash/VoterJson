@@ -1,22 +1,8 @@
 import json
 import pytest
-from voterjsonr.db_pg import get_db
-
-POLL_RESULTS = "SELECT count(pv.id) as num, pc.choice_name FROM poll_votes pv " \
-    "JOIN poll_choices pc on pc.id = pv.choice_id and pc.poll_id = pv.poll_id " \
-    "JOIN poll p on p.id = pv.poll_id " \
-    "WHERE p.poll_name = (%s) " \
-    "GROUP BY pc.choice_name"
-
-CHECK_CHOICES_FOR_BIRDS_POLL = "SELECT poll_choices.choice_name as cn FROM poll_choices " \
-                   "JOIN poll on poll.id = poll_choices.poll_id " \
-                   "WHERE poll_name = 'birds'"
-
-VOTES_POLLID_1_CHOICEID_1 = "SELECT count(id) as num from poll_votes " \
-                         "WHERE poll_id = 1 and choice_id = 1"
-
-COUNT_VOTES_POLLID_1 = "SELECT count(id) as num from poll_votes " \
-           "WHERE poll_id = 1"
+from sqlalchemy import func, desc
+from voterjsonr.database import db
+from voterjsonr.models import PollVotes, Poll, PollChoices
 
 BIRDS_CHOICES = {"jay", "blackbird", "sparrow"}
 
@@ -30,12 +16,12 @@ def test_create_poll(client, app):
     assert json.loads(response.data) == {'status': 'OK'}
 
     with app.app_context():
-        with get_db().cursor() as cur:
-            cur.execute(CHECK_CHOICES_FOR_BIRDS_POLL)
-            assert cur.fetchone() is not None
-            cur.execute(CHECK_CHOICES_FOR_BIRDS_POLL)
-            choice_names = {cn[0] for cn in cur.fetchall()}
-            assert choice_names == BIRDS_CHOICES
+        choice_names = db.session.execute(db.select(PollChoices.choice_name)
+                                             .join_from(PollChoices, Poll)
+                                             .where(Poll.poll_name == 'birds')
+                                             ).all()
+        assert choice_names is not None
+        assert {cn[0] for cn in choice_names} == BIRDS_CHOICES
 
 
 @pytest.mark.parametrize(('poll_name', 'choices', 'message'), (
@@ -51,22 +37,26 @@ def test_create_poll_validation(client, poll_name, choices, message):
 
 def test_poll_vote(client, app):
     with app.app_context():
-        with get_db().cursor() as cur:
-            cur.execute(COUNT_VOTES_POLLID_1)
-            num_of_pokemons = cur.fetchone()[0]
-            cur.execute(VOTES_POLLID_1_CHOICEID_1)
-            num_of_vote_1 = cur.fetchone()[0]
+        num_of_pokemons = db.session.execute(db.select(func.count(PollVotes.id))
+                                             .where(PollVotes.poll_id == 1)
+                                             ).first()[0]
+        num_of_vote_1 = db.session.execute(db.select(func.count(PollVotes.id))
+                                             .where(PollVotes.poll_id == 1, PollVotes.choice_id == 1)
+                                           ).first()[0]
 
     response = client.post('/api/poll/', json={"poll_id": 1, "choice_id": 1})
     assert response.status_code == 200
     assert json.loads(response.data) == {'status': 'OK'}
 
     with app.app_context():
-        with get_db().cursor() as cur:
-            cur.execute(COUNT_VOTES_POLLID_1)
-            assert cur.fetchone()[0] == num_of_pokemons + 1
-            cur.execute(VOTES_POLLID_1_CHOICEID_1)
-            assert cur.fetchone()[0] == num_of_vote_1 + 1
+        count_votes_pollid_1 = db.session.execute(db.select(func.count(PollVotes.id))
+                                                    .where(PollVotes.poll_id == 1)
+                                                  ).first()[0]
+        assert count_votes_pollid_1 == num_of_pokemons + 1
+        votes_pollid_1_choiceid_1 = db.session.execute(db.select(func.count(PollVotes.id))
+                                                       .where(PollVotes.poll_id == 1, PollVotes.choice_id == 1)
+                                                       ).first()[0]
+        assert votes_pollid_1_choiceid_1 == num_of_vote_1 + 1
 
 
 @pytest.mark.parametrize(('poll_id', 'choice_id', 'message'), (
@@ -89,14 +79,25 @@ def test_poll_results(client, app):
     assert benchmark == json.loads(response.data)
 
     with app.app_context():
-        with get_db().cursor() as cur:
-            test_poll_name = 'animals'
-            cur.execute(POLL_RESULTS, (test_poll_name,))
-            res_data = cur.fetchall()
-            dict_res = {'poll_name': test_poll_name, 'results': {}}
-            for num, choice_name in res_data:
-                dict_res["results"][choice_name] = num
-            assert dict_res == benchmark
+
+        test_poll_name = 'animals'
+        poll_results = db.session.execute(db.select(PollChoices.choice_name,
+                                                    func.count(PollVotes.id).label('count')
+                                                    )
+                                          .select_from(PollVotes)
+                                          .join(PollChoices, PollChoices.id == PollVotes.choice_id)
+                                          .join(Poll, Poll.id == PollVotes.poll_id)
+                                          .where(Poll.poll_name == test_poll_name)
+                                          .group_by(Poll.poll_name
+                                                    , PollChoices.choice_name
+                                                    )
+                                          .order_by(desc("count"))
+                                          ).all()
+
+        dict_res = {'poll_name': test_poll_name, 'results': {}}
+        for choice_name, num in poll_results:
+            dict_res["results"][choice_name] = num
+        assert dict_res == benchmark
 
 
 @pytest.mark.parametrize(('poll_id', 'message'), (

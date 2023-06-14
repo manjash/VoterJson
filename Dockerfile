@@ -1,14 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM python:3.10-bullseye as builder
-#RUN apk add --no-cache make
 
 ENV VIRTUAL_ENV=/usr/share/python3/app
-
-#COPY . .
-#RUN yarn install --production
-#CMD ["node", "src/index.js"]
-#EXPOSE 3000
-
 
 ################ Image for the virtual envirounment build  ################
 ## Base - "heavy" (~1GB, ~500M when compressed) image with libraries necessary

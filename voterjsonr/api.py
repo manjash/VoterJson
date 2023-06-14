@@ -3,6 +3,7 @@ from flask import (
     Blueprint, request, jsonify, Response
 )
 from voterjsonr.polls_service import PollsService
+from voterjsonr.database import db
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -27,7 +28,7 @@ def create_poll() -> Union[Response, tuple[Response, int]]:
     data = request.get_json(force=False, silent=False)
     name, choices = data['poll_name'], data['choices']
 
-    service = PollsService()
+    service = PollsService(db)
 
     try:
         service.create_poll(name, choices)
@@ -52,7 +53,7 @@ def poll_vote() -> Union[Response, tuple[Response, int]]:
     data = request.get_json(force=False, silent=False)
     poll_id, choice_id = data['poll_id'], data['choice_id']
 
-    service = PollsService()
+    service = PollsService(db)
     try:
         service.make_poll_vote(poll_id, choice_id)
     except Exception as err:
@@ -71,7 +72,7 @@ def poll_results() -> Union[Response, tuple[Response, int]]:
     data = request.get_json()
     poll_id = data['poll_id']
 
-    service = PollsService()
+    service = PollsService(db)
     try:
         res = service.get_poll_results(poll_id)
     except Exception as err:

@@ -1,25 +1,38 @@
 services:
   app:
     build: .
-    volumes:
-      - .env.docker:/python-docker/.env
+    env_file:
+      - .env.docker
+#      - .env.docker:/home/runner/work/VoterJson/VoterJson/.env
+#      - .env.docker:/python-docker/.env
     ports:
       - 6000:5000
+    depends_on:
+      db:
+        condition: service_healthy
+      test_db:
+        condition: service_healthy
   db:
     image: postgres:latest
     ports:
       - 5433:5432
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=qwerty123
-      - POSTGRES_DB=voterjson_db
+    env_file:
+      - .env.docker
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   test_db:
     image: postgres:latest
     ports:
       - 5434:5432
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=qwerty123
-      - POSTGRES_DB=voterjson_db_test
+    env_file:
+      - .env.testing
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 
